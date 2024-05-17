@@ -1,4 +1,4 @@
-from django.shortcuts import get_object_or_404
+from django.shortcuts import get_object_or_404, get_list_or_404
 
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
@@ -7,11 +7,12 @@ from rest_framework import status
 from rest_framework.decorators import permission_classes
 from rest_framework.permissions import IsAuthenticated
 
-from .models import Movie, Review
+from .models import Movie, Review, Genre
 from .serializers import (
 	MovieSerializer,
 	MovieListSerializer,
 	ReviewSerializer,
+	GenreListSerializer,
 )
 
 
@@ -31,6 +32,7 @@ def movie_detail(request, movie_id):
 	if request.method=="GET":
 		serializer = MovieSerializer(movie)
 		return Response(serializer.data)
+
 
 @api_view(['POST', 'DELETE'])
 @permission_classes([IsAuthenticated])
@@ -62,6 +64,7 @@ def movie_review_list(request, movie_id):
 			serializer.save(user=request.user, movie=movie)
 			return Response(serializer.data, status=status.HTTP_201_CREATED)
 
+
 @api_view(['DELETE'])
 @permission_classes([IsAuthenticated])
 def movie_review_detail(request, movie_id, review_id):
@@ -70,3 +73,11 @@ def movie_review_detail(request, movie_id, review_id):
 		if request.user == review.user:
 			review.delete()
 			return Response({'리뷰가 삭제되었습니다.'}, status=status.HTTP_204_NO_CONTENT)
+
+
+@api_view(['GET'])
+def genre_list(request):
+		if request.method=="GET":
+			genres = get_list_or_404(Genre)
+			serializer = GenreListSerializer(genres, many=True)
+			return Response(serializer.data)
