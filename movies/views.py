@@ -39,10 +39,12 @@ def movie_like(request, movie_id):
 
 	if request.method=="POST":
 		movie.like_users.add(request.user)
-		return Response(status=status.HTTP_201_CREATED)
+		serializer = MovieSerializer(movie)
+		return Response(serializer.data, status=status.HTTP_201_CREATED)
 	elif request.method=="DELETE":
 		movie.like_users.remove(request.user)
-		return Response(status=status.HTTP_204_NO_CONTENT)
+		serializer = MovieSerializer(movie)
+		return Response(serializer.data, status=status.HTTP_204_NO_CONTENT)
 
 
 @api_view(['GET', 'POST'])
@@ -59,3 +61,12 @@ def movie_review_list(request, movie_id):
 		if serializer.is_valid(raise_exception=True):
 			serializer.save(user=request.user, movie=movie)
 			return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+@api_view(['DELETE'])
+@permission_classes([IsAuthenticated])
+def movie_review_detail(request, movie_id, review_id):
+	if request.method=="DELETE":
+		review = get_object_or_404(Review, pk=review_id)
+		if request.user == review.user:
+			review.delete()
+			return Response({'리뷰가 삭제되었습니다.'}, status=status.HTTP_204_NO_CONTENT)
