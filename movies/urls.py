@@ -21,4 +21,5 @@ from . import views
 urlpatterns = [
     path('api-data/', loadData),
     path('', views.movie_list),
+    path('<int:movie_id>/', views.movie_detail),
 ]
