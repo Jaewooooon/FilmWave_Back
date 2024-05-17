@@ -26,6 +26,7 @@ def load_movie_data():
       movie_id = movie.get("id")
       adult = movie.get("adult", False)
       overview = movie.get("overview", "")
+      popularity = movie.get("popularity", 0.0)
       backdrop_path = movie.get("backdrop_path", "")
       poster_path = movie.get("poster_path", "")
       title = movie.get("title", "")
@@ -46,14 +47,13 @@ def load_movie_data():
       # print(release_date)
       # print(runtime)
 
-
-      # Movie 인스턴스 생성 및 저장
       movie_instance, created = Movie.objects.update_or_create(
           movie_id=movie_id,
           defaults={
               'title': title,
               'overview': overview,
               'poster_path': poster_path,
+              'popularity': popularity,
               'backdrop_path': backdrop_path,
               'release_date': release_date,
               'vote_average': vote_average,
@@ -65,6 +65,8 @@ def load_movie_data():
       for genre_id in genre_ids:
           genre = Genre.objects.get(genre_id=genre_id)
           movie_instance.genres.add(genre)
+  
+  print('finish')
 
 
 def load_genres():
@@ -85,4 +87,3 @@ def loadData(request):
   load_genres()
   load_movie_data()
   
-  pass

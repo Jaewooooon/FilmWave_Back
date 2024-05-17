@@ -16,7 +16,9 @@ Including another URLconf
 """
 from django.urls import path
 from .ApiDataLoader import loadData
+from . import views
 
 urlpatterns = [
     path('api-data/', loadData),
+    path('', views.movie_list),
 ]
