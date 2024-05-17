@@ -17,3 +17,9 @@ class Movie(models.Model):
 class Genre(models.Model):
     genre_id = models.CharField(max_length=100, primary_key=True)
     name = models.CharField(max_length=50)
+
+class Review(models.Model):
+  user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+  movie = models.ForeignKey('Movie', on_delete=models.CASCADE)
+  content = models.CharField(max_length=250)
+  score = models.FloatField()
