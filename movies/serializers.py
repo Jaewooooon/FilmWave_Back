@@ -16,3 +16,14 @@ class MovieListSerializer(serializers.ModelSerializer):
     def get_genres(self, obj):
       return GenreSerializer(obj.genres.all(), many=True).data
 
+
+class MovieSerializer(serializers.ModelSerializer):
+  genres = serializers.SerializerMethodField()
+  
+  class Meta:
+    model = Movie
+    fields = '__all__'
+
+  def get_genres(self, obj):
+    return GenreSerializer(obj.genres.all(), many=True).data
+  
