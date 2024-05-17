@@ -1,5 +1,7 @@
+from django.contrib.auth import get_user_model
 from rest_framework import serializers
 from .models import Movie, Genre
+
 
 class GenreSerializer(serializers.ModelSerializer):
     class Meta:
@@ -19,7 +21,14 @@ class MovieListSerializer(serializers.ModelSerializer):
 
 class MovieSerializer(serializers.ModelSerializer):
   genres = serializers.SerializerMethodField()
-  
+
+  class LikeUserListSerializer(serializers.ModelSerializer):
+     class Meta:
+        model = get_user_model()
+        fields = ('pk', 'username')
+
+  like_users = LikeUserListSerializer(many=True, read_only=True)
+
   class Meta:
     model = Movie
     fields = '__all__'

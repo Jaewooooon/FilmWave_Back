@@ -1,6 +1,6 @@
 from django.db import models
+from django.conf import settings
 
-# Create your models here.
 class Movie(models.Model):
   movie_id = models.CharField(max_length=100, primary_key=True)
   title = models.TextField()
@@ -12,7 +12,7 @@ class Movie(models.Model):
   vote_average = models.FloatField(null=True)
   adult = models.BooleanField(default=False)
   genres = models.ManyToManyField('Genre', related_name="movies")
-
+  like_users = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name="like_movies")
 
 class Genre(models.Model):
     genre_id = models.CharField(max_length=100, primary_key=True)
