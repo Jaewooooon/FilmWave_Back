@@ -56,3 +56,10 @@ class MembershipRequestSerializer(serializers.ModelSerializer):
         model = MembershipRequest
         fields = '__all__'
         read_only_fields = ('user', 'group',)
+
+
+class MembershipRequestListSerializer(serializers.ModelSerializer):
+    user = UserSerializer() 
+    class Meta:
+        model = MembershipRequest
+        fields = '__all__'

@@ -12,6 +12,7 @@ from .serializers import (
   GroupSerializer,
   GroupListSerializer,
   MembershipRequestSerializer,
+  MembershipRequestListSerializer,
 )
 # Create your views here.
 
@@ -44,14 +45,14 @@ def group_detail(request, group_id):
   group = get_object_or_404(Group, pk=group_id)
 
   if request.user.is_authenticated:
-    is_admin = MemberShip.objects.filter(group=group, user=request.user, role='admin')
+    is_group_admin = MemberShip.objects.filter(group=group, user=request.user, role='admin')
 
   if request.method=="GET":
     serializer = GroupSerializer(group)
     return Response(serializer.data)
   
   elif request.method=="PUT":
-    if not is_admin:
+    if not is_group_admin:
       return Response({'detail': 'You do not have permission to edit this group.'}, status=status.HTTP_403_FORBIDDEN) 
     
     serializer = GroupSerializer(group, data=request.data, partial=True)
@@ -60,7 +61,7 @@ def group_detail(request, group_id):
       return Response(serializer.data)
     
   elif request.method=="DELETE":
-    if not is_admin:
+    if not is_group_admin:
       return Response({'detail': 'You do not have permission to delete this group.'}, status=status.HTTP_403_FORBIDDEN) 
     
     data = {'detail': f'Group {group.title} deleted successfully.'}
@@ -73,8 +74,19 @@ def group_detail(request, group_id):
 def membership_list(request, group_id):
   group = get_object_or_404(Group, pk=group_id)
 
+  is_group_admin = MemberShip.objects.filter(group=group, user=request.user, role='admin')
+
   if request.method=="GET":
-    pass
+    # 그룹 관리자가 아니면 확인 X
+    if not is_group_admin:
+      return Response({'detail': 'You do not have permission to get membership requests.'}, status=status.HTTP_403_FORBIDDEN) 
+
+    membership_requests = MembershipRequest.objects.filter(group=group, status='pending')
+    serializer = MembershipRequestListSerializer(membership_requests, many=True)
+
+    return Response(serializer.data)
+    
+    
   elif request.method=="POST":
     is_request_exist = MembershipRequest.objects.filter(user=request.user, group=group).exists()
     # 이미 가입신청한 그룹에 또 신청할 수 없음
