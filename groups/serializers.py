@@ -59,6 +59,7 @@ class MembershipRequestSerializer(serializers.ModelSerializer):
 
 
 class MembershipRequestListSerializer(serializers.ModelSerializer):
+    user = UserSerializer() 
     class Meta:
         model = MembershipRequest
         fields = '__all__'
