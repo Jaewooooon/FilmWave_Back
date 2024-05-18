@@ -18,9 +18,15 @@ from .serializers import (
 
 @api_view(['GET'])
 def movie_list(request):
-	movies = Movie.objects.order_by('-popularity')[:20]
-
 	if request.method=="GET":
+		genreId = request.GET.get('genreId')
+
+		if genreId:
+			genre = get_object_or_404(Genre, pk=genreId)
+			movies = genre.movies.all().order_by('-popularity')[:20]
+		else: 
+			movies = Movie.objects.order_by('-popularity')[:20]
+
 		serializer = MovieListSerializer(movies, many=True)
 		return Response(serializer.data)
 
