@@ -9,7 +9,8 @@ from rest_framework.permissions import IsAuthenticated
 
 from .models import Group, MemberShip
 from .serializers import (
-  GroupSerializer
+  GroupSerializer,
+  GroupListSerializer,
 )
 # Create your views here.
 
@@ -17,7 +18,9 @@ from .serializers import (
 def group_list(request):
   print(request.user.is_authenticated)
   if request.method=="GET":
-    pass
+    groups = get_list_or_404(Group)
+    serializer = GroupListSerializer(groups, many=True)
+    return Response(serializer.data)
   elif request.method=="POST":
     # 로그인한 사용자만 그룹 생성 가능
     if not request.user.is_authenticated:

@@ -4,6 +4,8 @@ from django.conf import settings
 class Group(models.Model):
   title = models.CharField(max_length=200, unique=True)
   description = models.TextField()
+  create_at = models.DateTimeField(auto_now_add=True)
+  updated_at = models.DateTimeField(auto_now=True)
 
 
 class MemberShip(models.Model):
