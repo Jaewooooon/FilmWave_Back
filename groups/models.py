@@ -2,7 +2,7 @@ from django.db import models
 from django.conf import settings
 
 class Group(models.Model):
-  title = models.CharField(max_length=200)
+  title = models.CharField(max_length=200, unique=True)
   description = models.TextField()
 
 
