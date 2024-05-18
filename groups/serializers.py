@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Group, MemberShip
+from .models import Group, MemberShip, MembershipRequest
 from django.contrib.auth import get_user_model
 
 User = get_user_model()
@@ -50,3 +50,9 @@ class GroupListSerializer(serializers.ModelSerializer):
     def get_members_count(self, obj):
         return MemberShip.objects.filter(group=obj).count()
 
+
+class MembershipRequestSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = MembershipRequest
+        fields = '__all__'
+        read_only_fields = ('user', 'group',)
