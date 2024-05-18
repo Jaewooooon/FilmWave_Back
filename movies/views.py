@@ -7,6 +7,8 @@ from rest_framework import status
 from rest_framework.decorators import permission_classes
 from rest_framework.permissions import IsAuthenticated
 
+from django.core.paginator import Paginator, EmptyPage
+
 from .models import Movie, Review, Genre
 from .serializers import (
 	MovieSerializer,
@@ -20,14 +22,23 @@ from .serializers import (
 def movie_list(request):
 	if request.method=="GET":
 		genreId = request.GET.get('genreId')
+		page = request.GET.get('page', 1)
 
 		if genreId:
 			genre = get_object_or_404(Genre, pk=genreId)
-			movies = genre.movies.all().order_by('-popularity')[:20]
+			movies = genre.movies.all().order_by('-popularity')
 		else: 
-			movies = Movie.objects.order_by('-popularity')[:20]
+			movies = Movie.objects.order_by('-popularity')
 
-		serializer = MovieListSerializer(movies, many=True)
+		paginator = Paginator(movies, 20)
+
+		try:
+				page_obj = paginator.page(page)
+		except EmptyPage:
+				return Response({"detail": "없는 페이지입니다."}, status=status.HTTP_404_NOT_FOUND)
+        
+
+		serializer = MovieListSerializer(page_obj, many=True)
 		return Response(serializer.data)
 
 
