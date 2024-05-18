@@ -37,16 +37,28 @@ def group_list(request):
       MemberShip.objects.create(user=request.user, group=group, role='admin')
       return Response(serializer.data, status=status.HTTP_201_CREATED)
   
-@api_view(['GET', 'DELETE'])
+@api_view(['GET', 'DELETE', 'PUT'])
 def group_detail(request, group_id):
+  print(group_id)
   group = get_object_or_404(Group, pk=group_id)
+
+  if request.user.is_authenticated:
+    is_admin = MemberShip.objects.filter(group=group, user=request.user, role='admin')
 
   if request.method=="GET":
     serializer = GroupSerializer(group)
     return Response(serializer.data)
+  
+  elif request.method=="PUT":
+    if not is_admin:
+      return Response({'detail': 'You do not have permission to edit this group.'}, status=status.HTTP_403_FORBIDDEN) 
+    
+    serializer = GroupSerializer(group, data=request.data, partial=True)
+    if serializer.is_valid(raise_exception=True):
+      serializer.save()
+      return Response(serializer.data)
+    
   elif request.method=="DELETE":
-    is_admin = MemberShip.objects.filter(group=group, user=request.user, role='admin')
-
     if not is_admin:
       return Response({'detail': 'You do not have permission to delete this group.'}, status=status.HTTP_403_FORBIDDEN) 
     
