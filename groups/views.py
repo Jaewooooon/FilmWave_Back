@@ -37,3 +37,10 @@ def group_list(request):
       MemberShip.objects.create(user=request.user, group=group, role='admin')
       return Response(serializer.data, status=status.HTTP_201_CREATED)
   
+@api_view(['GET'])
+def group_detail(request, group_id):
+  if request.method=="GET":
+    group = get_object_or_404(Group, pk=group_id)
+    serializer = GroupSerializer(group)
+    return Response(serializer.data)
+
