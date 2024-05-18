@@ -37,10 +37,19 @@ def group_list(request):
       MemberShip.objects.create(user=request.user, group=group, role='admin')
       return Response(serializer.data, status=status.HTTP_201_CREATED)
   
-@api_view(['GET'])
+@api_view(['GET', 'DELETE'])
 def group_detail(request, group_id):
+  group = get_object_or_404(Group, pk=group_id)
+
   if request.method=="GET":
-    group = get_object_or_404(Group, pk=group_id)
     serializer = GroupSerializer(group)
     return Response(serializer.data)
+  elif request.method=="DELETE":
+    is_admin = MemberShip.objects.filter(group=group, user=request.user, role='admin')
 
+    if not is_admin:
+      return Response({'detail': 'You do not have permission to delete this group.'}, status=status.HTTP_403_FORBIDDEN) 
+    
+    data = {'detail': f'Group {group.title} deleted successfully.'}
+    group.delete()
+    return Response(data, status=status.HTTP_204_NO_CONTENT)
