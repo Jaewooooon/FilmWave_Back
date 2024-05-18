@@ -7,10 +7,11 @@ from rest_framework import status
 from rest_framework.decorators import permission_classes
 from rest_framework.permissions import IsAuthenticated
 
-from .models import Group, MemberShip
+from .models import Group, MemberShip, MembershipRequest
 from .serializers import (
   GroupSerializer,
   GroupListSerializer,
+  MembershipRequestSerializer,
 )
 # Create your views here.
 
@@ -65,3 +66,23 @@ def group_detail(request, group_id):
     data = {'detail': f'Group {group.title} deleted successfully.'}
     group.delete()
     return Response(data, status=status.HTTP_204_NO_CONTENT)
+
+
+@api_view(['GET', 'POST'])
+@permission_classes([IsAuthenticated])
+def membership_list(request, group_id):
+  group = get_object_or_404(Group, pk=group_id)
+
+  if request.method=="GET":
+    pass
+  elif request.method=="POST":
+    is_request_exist = MembershipRequest.objects.filter(user=request.user, group=group).exists()
+    # 이미 가입신청한 그룹에 또 신청할 수 없음
+    if is_request_exist:
+      return Response({'detail': 'Membership request already exists.'}, status=status.HTTP_400_BAD_REQUEST)
+
+    serializer = MembershipRequestSerializer(data=request.data)
+
+    if serializer.is_valid():
+      serializer.save(user=request.user, group=group)
+      return Response(serializer.data, status=status.HTTP_201_CREATED)
