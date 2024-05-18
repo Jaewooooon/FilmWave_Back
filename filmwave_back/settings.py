@@ -32,7 +32,7 @@ ALLOWED_HOSTS = []
 INSTALLED_APPS = [
     'accounts',
     'movies',
-    'groups'
+    'groups',
     # django rest framework
     'rest_framework',
     'rest_framework.authtoken',
