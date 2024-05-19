@@ -1,3 +1,4 @@
+import json
 from django.shortcuts import get_object_or_404, get_list_or_404
 
 from rest_framework.decorators import api_view
@@ -14,7 +15,6 @@ from .serializers import (
   MembershipRequestSerializer,
   MembershipRequestListSerializer,
 )
-# Create your views here.
 
 @api_view(['GET', 'POST'])
 def group_list(request):
@@ -45,7 +45,7 @@ def group_detail(request, group_id):
   group = get_object_or_404(Group, pk=group_id)
 
   if request.user.is_authenticated:
-    is_group_admin = MemberShip.objects.filter(group=group, user=request.user, role='admin')
+    is_group_admin = MemberShip.objects.filter(group=group, user=request.user, role='admin').exists()
 
   if request.method=="GET":
     serializer = GroupSerializer(group)
@@ -71,10 +71,10 @@ def group_detail(request, group_id):
 
 @api_view(['GET', 'POST'])
 @permission_classes([IsAuthenticated])
-def membership_list(request, group_id):
+def membership_request_list(request, group_id):
   group = get_object_or_404(Group, pk=group_id)
 
-  is_group_admin = MemberShip.objects.filter(group=group, user=request.user, role='admin')
+  is_group_admin = MemberShip.objects.filter(group=group, user=request.user, role='admin').exists()
 
   if request.method=="GET":
     # 그룹 관리자가 아니면 확인 X
@@ -98,3 +98,33 @@ def membership_list(request, group_id):
     if serializer.is_valid():
       serializer.save(user=request.user, group=group)
       return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+
+@api_view(['PATCH'])
+@permission_classes([IsAuthenticated])
+def membership_request_detail(request, group_id, membership_request_id):
+  group = get_object_or_404(Group, pk=group_id)
+  is_group_admin = MemberShip.objects.filter(group=group, user=request.user, role='admin').exists()
+  print(is_group_admin)
+
+  if request.method=="PATCH":
+    # 그룹의 관리자가 아니면 요청 변경 불가
+    if not is_group_admin:
+      return Response({'detail': 'You do not have permission to edit this membership request.'}, status=status.HTTP_403_FORBIDDEN) 
+
+    membership_request = get_object_or_404(MembershipRequest, pk=membership_request_id)
+    
+    # 이미 처리된 신청은 다시 처리 X
+    if membership_request.is_processed():
+      return Response({'detail': 'This membership request has already processed'}, status=status.HTTP_400_BAD_REQUEST)
+
+    approval = json.loads(request.data.get('approval'))
+
+    if approval:
+      membership_request.approve()
+      data = {'detail': 'Membership request approved successfully'}
+    else:
+      membership_request.reject()
+      data = {'detail': 'Membership request rejected'}
+
+    return Response(data, status=status.HTTP_204_NO_CONTENT)

@@ -38,3 +38,16 @@ class MembershipRequest(models.Model):
 
     class Meta:
         unique_together = ('user', 'group')
+
+    def approve(self):
+      self.status = 'approved'
+      self.save()
+      MemberShip.objects.create(user=self.user, group=self.group, role='member')
+
+    def reject(self):
+      self.status = 'rejected'
+      self.save()
+
+    def is_processed(self):
+      return self.status != 'pending'
+
