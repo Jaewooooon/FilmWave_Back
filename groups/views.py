@@ -52,7 +52,7 @@ def group_detail(request, group_id):
     is_group_admin = MemberShip.objects.filter(group=group, user=request.user, role='admin').exists()
 
   if request.method=="GET":
-    serializer = GroupSerializer(group)
+    serializer = GroupSerializer(group, context={'request': request})
     return Response(serializer.data)
   
   elif request.method=="PUT":
