@@ -14,6 +14,7 @@ class GroupSerializer(serializers.ModelSerializer):
     admin = serializers.SerializerMethodField()
     members_count = serializers.SerializerMethodField()
     members = serializers.SerializerMethodField()
+    membership_status = serializers.SerializerMethodField()
 
     class Meta:
         model = Group
@@ -31,7 +32,19 @@ class GroupSerializer(serializers.ModelSerializer):
     def get_members(self, obj):
         members = MemberShip.objects.filter(group=obj).select_related('user')
         return UserSerializer([member.user for member in members], many=True).data
-    
+
+    def get_membership_status(self, obj):
+        request = self.context.get('request', None)
+        print(request)
+        if not request.user.is_authenticated:
+            return ''
+        
+        membership_request = MembershipRequest.objects.filter(group=obj, user=request.user).first()
+        if membership_request:
+            return membership_request.status
+
+        return None
+
 
 class GroupListSerializer(serializers.ModelSerializer):
     admin = serializers.SerializerMethodField()
