@@ -13,7 +13,11 @@ class Movie(models.Model):
   adult = models.BooleanField(default=False)
   genres = models.ManyToManyField('Genre', related_name="movies")
   like_users = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name="like_movies")
+  embedding = models.JSONField(null=True, blank=True)
 
+  def __str__(self):
+     return self.title
+  
 class Genre(models.Model):
     genre_id = models.CharField(max_length=100, primary_key=True)
     name = models.CharField(max_length=50)
