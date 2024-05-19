@@ -20,7 +20,11 @@ from .serializers import (
 def group_list(request):
   print(request.user.is_authenticated)
   if request.method=="GET":
-    groups = get_list_or_404(Group)
+    groups = Group.objects.all()
+
+    if not groups:
+      return Response({'detail': 'No groups available'})
+
     serializer = GroupListSerializer(groups, many=True)
     return Response(serializer.data)
   elif request.method=="POST":
