@@ -13,7 +13,7 @@ class MovieListSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Movie
-        fields = '__all__'
+        exclude = ('embedding',)
 
     def get_genres(self, obj):
       return GenreSerializer(obj.genres.all(), many=True).data
