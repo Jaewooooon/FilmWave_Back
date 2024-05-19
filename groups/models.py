@@ -50,4 +50,3 @@ class MembershipRequest(models.Model):
 
     def is_processed(self):
       return self.status != 'pending'
-

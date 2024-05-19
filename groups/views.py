@@ -132,3 +132,17 @@ def membership_request_detail(request, group_id, membership_request_id):
       data = {'detail': 'Membership request rejected'}
 
     return Response(data, status=status.HTTP_204_NO_CONTENT)
+
+
+@api_view(['DELETE'])
+@permission_classes([IsAuthenticated])
+def group_leave(request, group_id):
+  group = get_object_or_404(Group, pk=group_id)
+  membership = get_object_or_404(MemberShip, group=group, user=request.user)
+
+  if membership.role == 'admin':
+        return Response({'detail': 'Group admin cannot leave the group.'}, status=status.HTTP_403_FORBIDDEN)
+    
+  membership.delete()
+  
+  return Response({'detail': 'You have left the group successfully.'}, status=status.HTTP_204_NO_CONTENT)
