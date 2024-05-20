@@ -14,6 +14,7 @@ class Movie(models.Model):
   genres = models.ManyToManyField('Genre', related_name="movies")
   like_users = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name="like_movies")
   embedding = models.JSONField(null=True, blank=True)
+  genre_embedding = models.JSONField(null=True, blank=True)
 
   def __str__(self):
      return self.title
