@@ -71,6 +71,15 @@ def movie_like(request, movie_id):
     return Response(serializer.data, status=status.HTTP_204_NO_CONTENT)
 
 
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def movie_like_list(request):
+  if request.method=="GET":
+     movies=request.user.like_movies.all()
+     serializer = MovieListSerializer(movies, many=True)
+     return Response(serializer.data)
+
+
 @api_view(['GET', 'POST'])
 def movie_review_list(request, movie_id):
   movie = get_object_or_404(Movie, pk=movie_id)

@@ -8,6 +8,7 @@ class GenreSerializer(serializers.ModelSerializer):
         model = Genre
         fields = ('genre_id', 'name')
 
+
 class MovieListSerializer(serializers.ModelSerializer):
     genres = serializers.SerializerMethodField()
 
