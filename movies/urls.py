@@ -6,6 +6,7 @@ urlpatterns = [
     path('api-data/', loadData),
     path('', views.movie_list),
     path('search/', views.movie_search),
+    path('likes/', views.movie_like_list),
     path('<int:movie_id>/', views.movie_detail),
     path('<int:movie_id>/like/', views.movie_like),
     path('<int:movie_id>/reviews/', views.movie_review_list),
