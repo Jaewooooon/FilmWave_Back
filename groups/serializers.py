@@ -73,3 +73,10 @@ class MembershipRequestListSerializer(serializers.ModelSerializer):
     class Meta:
         model = MembershipRequest
         fields = '__all__'
+
+
+class MembershipListSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = MemberShip
+        fields = '__all__'
+        
