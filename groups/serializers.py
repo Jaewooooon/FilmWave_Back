@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Group, MemberShip, MembershipRequest
+from .models import Group, MemberShip, MembershipRequest, Post
 from django.contrib.auth import get_user_model
 
 User = get_user_model()
@@ -80,4 +80,16 @@ class MembershipListSerializer(serializers.ModelSerializer):
     class Meta:
         model = MemberShip
         fields = '__all__'
-        
+
+
+class PostListSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Post
+        fields = '__all__'
+    
+
+class PostSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Post
+        fields = '__all__'
+        read_only_fields = ('user', 'group', 'movie',)
