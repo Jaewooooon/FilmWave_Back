@@ -14,6 +14,7 @@ from .serializers import (
     GroupListSerializer,
     MembershipRequestSerializer,
     MembershipRequestListSerializer,
+    MembershipListSerializer,
 )
 
 from movies.serializers import (
@@ -54,6 +55,15 @@ def group_list(request):
             group = serializer.save()
             MemberShip.objects.create(user=request.user, group=group, role="admin")
             return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
+def my_group_list(request):
+    if request.method == "GET":
+        memberships = MemberShip.objects.filter(user=request.user)
+        serializer = MembershipListSerializer(memberships, many=True)
+        return Response(serializer.data)
 
 
 @api_view(["GET", "DELETE", "PUT"])
