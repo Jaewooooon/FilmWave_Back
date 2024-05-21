@@ -8,6 +8,8 @@ from rest_framework import status
 from rest_framework.decorators import permission_classes
 from rest_framework.permissions import IsAuthenticated
 
+from utils.S3ImageUploader import S3ImageUploader
+
 from .models import Group, MemberShip, MembershipRequest
 from .serializers import (
     GroupSerializer,
@@ -24,7 +26,6 @@ from movies.serializers import (
 @api_view(["GET", "POST"])
 @permission_classes([IsAuthenticated])
 def group_list(request):
-    print(request.user.is_authenticated)
     if request.method == "GET":
         groups = Group.objects.all()
 
@@ -35,14 +36,26 @@ def group_list(request):
         return Response(serializer.data)
     elif request.method == "POST":
         # 로그인한 사용자만 그룹 생성 가능
-        print(request.user.is_authenticated)
         if not request.user.is_authenticated:
             return Response(
                 {"detail": "Authentication credentials were not provided."},
                 status=status.HTTP_401_UNAUTHORIZED,
             )
 
+        uploader = S3ImageUploader()
+
+        image = request.FILES.get('image')
+
+        if image:
+            image_url = uploader.upload_image(image, image.content_type)
+        else:
+            image_url = None
+
+        print(image_url)
+        print(type(image_url))
+
         serializer = GroupSerializer(data=request.data, context={'request': request})
+
         if serializer.is_valid(raise_exception=True):
             # 그룹 이름이 이미 존재하면 생성 X
             group_name = serializer.validated_data.get("title")
@@ -51,8 +64,8 @@ def group_list(request):
                     {"detail": "A group with this name already exists."},
                     status=status.HTTP_400_BAD_REQUEST,
                 )
+            group = serializer.save(image = image_url)
 
-            group = serializer.save()
             MemberShip.objects.create(user=request.user, group=group, role="admin")
             return Response(serializer.data, status=status.HTTP_201_CREATED)
 
