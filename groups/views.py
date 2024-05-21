@@ -266,3 +266,21 @@ def group_post_list(request, group_id):
             # 게시물 작성
             serializer.save(user=request.user, group=group)
             return Response(serializer.data)
+
+
+@api_view(["PUT", "DELETE"])
+@permission_classes([IsAuthenticated])
+def group_post_detail(request, group_id, post_id):
+    post = get_object_or_404(Post, pk=post_id)
+
+    if not post.user == request.user:
+        return Response({"detail": "You do not have permission to handle this post."} ,status=status.HTTP_403_FORBIDDEN)
+
+    if request.method == "PUT":
+        serializer = PostSerializer(post, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+    elif request.method == "DELETE":
+        post.delete()
+        return Response({'detail': 'post deleted successfully'})
