@@ -10,4 +10,5 @@ urlpatterns = [
     path('<int:group_id>/membership-requests/<int:membership_request_id>/', views.membership_request_detail),
     path('<int:group_id>/membership/', views.group_leave),
     path('<int:group_id>/movies/', views.group_like_movie_list),
+    path('<int:group_id>/posts/', views.group_post_list),
 ]

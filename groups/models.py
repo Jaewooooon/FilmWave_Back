@@ -51,3 +51,15 @@ class MembershipRequest(models.Model):
 
     def is_processed(self):
       return self.status != 'pending'
+
+
+class Post(models.Model):
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    group = models.ForeignKey('Group', on_delete=models.CASCADE)
+    movie = models.ForeignKey('movies.Movie', on_delete=models.SET_NULL, null=True, blank=True)
+    title = models.CharField(max_length=100)
+    content = models.TextField()
+    create_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+

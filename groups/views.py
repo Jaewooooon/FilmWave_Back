@@ -10,13 +10,15 @@ from rest_framework.permissions import IsAuthenticated
 
 from utils.S3ImageUploader import S3ImageUploader
 
-from .models import Group, MemberShip, MembershipRequest
+from .models import Group, MemberShip, MembershipRequest, Post
 from .serializers import (
     GroupSerializer,
     GroupListSerializer,
     MembershipRequestSerializer,
     MembershipRequestListSerializer,
     MembershipListSerializer,
+    PostSerializer,
+    PostListSerializer,
 )
 
 from movies.serializers import (
@@ -241,3 +243,26 @@ def group_like_movie_list(request, group_id):
         serializer = MovieListSerializer(group_like_movies, many=True)
         
         return Response(serializer.data)
+
+
+@api_view(["GET", "POST"])
+@permission_classes([IsAuthenticated])
+def group_post_list(request, group_id):
+    group = get_object_or_404(Group, pk=group_id)
+
+    if request.method == "GET":
+        posts = Post.objects.filter(group=group)
+        serializer = PostListSerializer(posts, many=True)
+        return Response(serializer.data)
+    elif request.method == "POST":
+        # 그룹의 멤버가 아니면 작성 X
+        is_member = MemberShip.objects.filter(user=request.user).exists()
+
+        if not is_member:
+            return Response({'detail': 'only group member can write posts'}, status=status.HTTP_403_FORBIDDEN)
+
+        serializer = PostSerializer(data=request.data)
+        if serializer.is_valid(raise_exception=True):
+            # 게시물 작성
+            serializer.save(user=request.user, group=group)
+            return Response(serializer.data)
