@@ -36,9 +36,6 @@ class GroupSerializer(serializers.ModelSerializer):
     def get_membership_status(self, obj):
         request = self.context.get('request', None)
         print(request)
-        if not request.user.is_authenticated:
-            return ''
-        
         membership_request = MembershipRequest.objects.filter(group=obj, user=request.user).first()
         if membership_request:
             return membership_request.status
