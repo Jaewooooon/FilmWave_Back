@@ -19,6 +19,7 @@ class GroupSerializer(serializers.ModelSerializer):
     class Meta:
         model = Group
         fields = '__all__'
+        read_only_fields = ('image',)
 
     def get_admin(self, obj):
         admin = MemberShip.objects.filter(group=obj, role='admin').select_related('user').first()
