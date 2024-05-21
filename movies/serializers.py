@@ -13,7 +13,7 @@ class MovieListSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Movie
-        exclude = ('embedding',)
+        exclude = ('embedding', 'genre_embedding')
 
     def get_genres(self, obj):
       return GenreSerializer(obj.genres.all(), many=True).data
@@ -31,7 +31,7 @@ class MovieSerializer(serializers.ModelSerializer):
 
   class Meta:
     model = Movie
-    fields = '__all__'
+    exclude = ('embedding', 'genre_embedding')
 
   def get_genres(self, obj):
     return GenreSerializer(obj.genres.all(), many=True).data

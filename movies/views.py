@@ -55,31 +55,57 @@ def movie_list(request):
 def movie_recommend_list(request):
     # 사용자가 좋아요한 영화의 장르 기반으로 임베딩 계산
     user_preference = get_object_or_404(UserPreference, user=request.user)
-
+    
+    if user_preference.embedding == '[]':
+        movies = Movie.objects.order_by("-popularity")[:20]
+        serializer = MovieListSerializer(movies, many=True)
+        return Response(serializer.data)
+    
     like_movies = request.user.like_movies.all()
-    print(like_movies)
     genre_counts = {}
 
     for movie in like_movies:
         for genre in movie.genres.all():
             print(genre.name)
             genre_counts[genre.name] = genre_counts.get(genre.name, 0) + 1
-    
-    print(user_preference.user)
-    print(genre_counts)
 
     genre_embeddings = []
     for genre_name, count in genre_counts.items():
-        genre_embedding = model(**tokenizer(genre_name, return_tensors='pt', truncation=True, padding=True)).last_hidden_state.mean(dim=1).squeeze().tolist()
+        genre_tokens = tokenizer(genre_name, return_tensors='pt', truncation=True, padding=True)
+        with torch.no_grad():
+            genre_embedding = model(**genre_tokens).last_hidden_state.mean(dim=1).squeeze().tolist()
         weighted_embedding = [count * val for val in genre_embedding]  # 장르 등장 횟수만큼 임베딩 가중치 적용
         genre_embeddings.append(weighted_embedding)
 
     # 장르 임베딩을 하나의 벡터로 결합
     user_preference_embedding = [sum(embed) for embed in zip(*genre_embeddings)]
 
-    # 계산된 사용자의 선호도 임베딩을 JSON 형식으로 변환하여 응답
     user_preference.embedding = json.dumps(user_preference_embedding)
-    return Response({"user_preference_embedding": user_preference.embedding})
+    user_preference.save()
+
+    # 유사도 계산을 한 영화임베딩
+    movies = Movie.objects.all()
+    movie_embeddings = []
+    for movie in movies:
+        if movie.genre_embedding:
+            movie_embeddings.append((movie, torch.tensor(movie.genre_embedding)))
+
+    # 유저 선호도 임베딩을 텐서로 변환
+    user_preference_tensor = torch.tensor(user_preference_embedding)
+
+    # 코사인 유사도를 계산하여 영화들을 정렬
+    similarities = []
+    for movie, movie_embedding in movie_embeddings:
+        similarity = torch.nn.functional.cosine_similarity(user_preference_tensor.unsqueeze(0), movie_embedding.unsqueeze(0)).item()
+        similarities.append((movie, similarity))
+
+    # 유사도에 따라 영화를 정렬 -> 같으면 인기순
+    sorted_movies = sorted(similarities, key=lambda x: (x[1], x[0].popularity), reverse=True)
+    top_movies = [movie for movie, _ in sorted_movies[:20]]  # 상위 20개의 영화 선택
+
+    serializer = MovieListSerializer(top_movies, many=True)
+    return Response(serializer.data)
+
 
 @api_view(["GET"])
 def movie_detail(request, movie_id):
