@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     # django cors headers
     'corsheaders',
 
+    
     # dj_rest_auth
     'dj_rest_auth',
     'django.contrib.sites',
