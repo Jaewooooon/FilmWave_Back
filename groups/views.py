@@ -45,7 +45,7 @@ def group_list(request):
                 status=status.HTTP_401_UNAUTHORIZED,
             )
 
-        # uploader = S3ImageUploader()
+        uploader = S3ImageUploader()
 
         image = request.FILES.get('image')
 

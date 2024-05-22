@@ -77,6 +77,26 @@ class MembershipRequestListSerializer(serializers.ModelSerializer):
 
 
 class MembershipListSerializer(serializers.ModelSerializer):
+    class GroupSerializer(serializers.ModelSerializer):
+        admin = serializers.SerializerMethodField()
+        members_count = serializers.SerializerMethodField()
+
+        class Meta:
+            model = Group
+            fields = '__all__'
+            read_only_fields = ('image',)
+
+        def get_admin(self, obj):
+            admin = MemberShip.objects.filter(group=obj, role='admin').select_related('user').first()
+            if admin:
+                return UserSerializer(admin.user).data
+            return None
+        
+        def get_members_count(self, obj):
+            return MemberShip.objects.filter(group=obj).count()
+        
+    group = GroupSerializer()
+
     class Meta:
         model = MemberShip
         fields = '__all__'
