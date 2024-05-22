@@ -28,5 +28,5 @@ class Review(models.Model):
   movie = models.ForeignKey('Movie', on_delete=models.CASCADE)
   content = models.CharField(max_length=250)
   score = models.FloatField()
-  create_at = models.DateTimeField(auto_now_add=True)
+  created_at = models.DateTimeField(auto_now_add=True)
   updated_at = models.DateTimeField(auto_now=True)

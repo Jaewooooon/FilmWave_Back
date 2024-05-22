@@ -46,3 +46,17 @@ class GenreListSerializer(serializers.ModelSerializer):
   class Meta:
     model = Genre
     fields = '__all__'
+
+
+class ReviewWithMovieSerializer(serializers.ModelSerializer):
+    class UserSerializer(serializers.ModelSerializer):
+        class Meta:
+            model = get_user_model()
+            fields = ('id', 'username',)
+
+    movie = MovieListSerializer()
+    user = UserSerializer()
+    
+    class Meta:
+        model = Review
+        fields = '__all__'
