@@ -4,6 +4,7 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework import status
 import json 
+import random
 
 from rest_framework.decorators import permission_classes
 from rest_framework.permissions import IsAuthenticated
@@ -56,9 +57,11 @@ def movie_recommend_list(request):
     # 사용자가 좋아요한 영화의 장르 기반으로 임베딩 계산
     user_preference = get_object_or_404(UserPreference, user=request.user)
     
+    # 좋아요를 누르지 않았으면 인기순 100개중 랜덤추천
     if user_preference.embedding == '[]':
-        movies = Movie.objects.order_by("-popularity")[:20]
-        serializer = MovieListSerializer(movies, many=True)
+        movies = Movie.objects.order_by("-popularity")[:100]
+        random_movies = random.sample(list(movies), 20)  # 100개 중에서 랜덤으로 20개 선택
+        serializer = MovieListSerializer(random_movies, many=True)
         return Response(serializer.data)
     
     like_movies = request.user.like_movies.all()
