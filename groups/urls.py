@@ -12,4 +12,5 @@ urlpatterns = [
     path('<int:group_id>/movies/', views.group_like_movie_list),
     path('<int:group_id>/posts/', views.group_post_list),
     path('<int:group_id>/posts/<int:post_id>/', views.group_post_detail),
+    path('<int:group_id>/posts/<int:post_id>/comments/', views.group_comment_list),
 ]

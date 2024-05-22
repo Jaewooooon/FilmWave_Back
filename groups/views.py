@@ -19,6 +19,7 @@ from .serializers import (
     MembershipListSerializer,
     PostSerializer,
     PostListSerializer,
+    CommentSerializer,
 )
 
 from movies.serializers import (
@@ -44,7 +45,7 @@ def group_list(request):
                 status=status.HTTP_401_UNAUTHORIZED,
             )
 
-        uploader = S3ImageUploader()
+        # uploader = S3ImageUploader()
 
         image = request.FILES.get('image')
 
@@ -284,3 +285,15 @@ def group_post_detail(request, group_id, post_id):
     elif request.method == "DELETE":
         post.delete()
         return Response({'detail': 'post deleted successfully'})
+
+
+@api_view(["POST"])
+@permission_classes([IsAuthenticated])
+def group_comment_list(request, group_id, post_id):
+    post = get_object_or_404(Post, pk=post_id)
+
+    if request.method == "POST":
+        serializer = CommentSerializer(data=request.data)
+        if serializer.is_valid(raise_exception=True):
+            serializer.save(user=request.user, post=post)
+            return Response(serializer.data)
