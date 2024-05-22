@@ -58,7 +58,11 @@ def movie_recommend_list(request):
     user_preference = get_object_or_404(UserPreference, user=request.user)
     
     # 좋아요를 누르지 않았으면 인기순 100개중 랜덤추천
-    if user_preference.embedding == '[]':
+    like_movies = request.user.like_movies.all()
+
+    print(len(like_movies))
+
+    if len(like_movies) == 0:
         movies = Movie.objects.order_by("-popularity")[:100]
         random_movies = random.sample(list(movies), 20)  # 100개 중에서 랜덤으로 20개 선택
         serializer = MovieListSerializer(random_movies, many=True)
