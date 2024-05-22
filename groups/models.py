@@ -5,7 +5,7 @@ class Group(models.Model):
   title = models.CharField(max_length=200, unique=True)
   description = models.TextField()
   image = models.TextField(null=True, blank=True)
-  create_at = models.DateTimeField(auto_now_add=True)
+  created_at = models.DateTimeField(auto_now_add=True)
   updated_at = models.DateTimeField(auto_now=True)
 
 

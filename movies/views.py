@@ -19,6 +19,7 @@ from .serializers import (
     MovieListSerializer,
     ReviewSerializer,
     GenreListSerializer,
+    ReviewWithMovieSerializer,
 )
 
 # 검색
@@ -60,8 +61,6 @@ def movie_recommend_list(request):
     # 좋아요를 누르지 않았으면 인기순 100개중 랜덤추천
     like_movies = request.user.like_movies.all()
 
-    print(len(like_movies))
-
     if len(like_movies) == 0:
         movies = Movie.objects.order_by("-popularity")[:100]
         random_movies = random.sample(list(movies), 20)  # 100개 중에서 랜덤으로 20개 선택
@@ -73,7 +72,6 @@ def movie_recommend_list(request):
 
     for movie in like_movies:
         for genre in movie.genres.all():
-            print(genre.name)
             genre_counts[genre.name] = genre_counts.get(genre.name, 0) + 1
 
     genre_embeddings = []
@@ -115,6 +113,16 @@ def movie_recommend_list(request):
 
 
 @api_view(["GET"])
+def movie_recent_review_list(request):
+    # 최근 리뷰 5개를 가져옵니다.
+    recent_reviews = Review.objects.order_by('-created_at')[:6]
+    print(recent_reviews)
+    # 각 리뷰에 대해 영화 정보를 포함하여 시리얼라이즈합니다.
+    serializer = ReviewWithMovieSerializer(recent_reviews, many=True)
+    return Response(serializer.data)
+
+
+@api_view(["GET"])
 def movie_detail(request, movie_id):
     movie = get_object_or_404(Movie, pk=movie_id)
 
@@ -147,7 +155,6 @@ def genre_frequency(request):
         genres = {}
         for movie in movies:
             for genre in movie.genres.all():
-                print(genre.name)
                 if genre.name in genres:
                     genres[genre.name] += 1
                 else:
@@ -204,7 +211,6 @@ def genre_list(request):
 @api_view(["GET"])
 def movie_search(request):
     query = request.GET.get("q")
-    print(query)
     if not query:
         return Response(
             {"detail": "Query parameter is required."},
