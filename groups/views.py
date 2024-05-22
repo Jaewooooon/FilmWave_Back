@@ -10,7 +10,7 @@ from rest_framework.permissions import IsAuthenticated
 
 from utils.S3ImageUploader import S3ImageUploader
 
-from .models import Group, MemberShip, MembershipRequest, Post
+from .models import Group, MemberShip, MembershipRequest, Post, Comment
 from .serializers import (
     GroupSerializer,
     GroupListSerializer,
@@ -297,3 +297,22 @@ def group_comment_list(request, group_id, post_id):
         if serializer.is_valid(raise_exception=True):
             serializer.save(user=request.user, post=post)
             return Response(serializer.data)
+
+@api_view(["PUT" ,"DELETE"])
+@permission_classes([IsAuthenticated])
+def group_comment_detail(request, group_id, post_id, comment_id):
+    comment = get_object_or_404(Comment, pk=comment_id)
+    
+    if request.user != comment.user:
+        return Response({"detail": "You do not have permission to handle this comment."}, status=status.HTTP_403_FORBIDDEN)
+
+    if request.method == "PUT":
+        serializer = CommentSerializer(comment, data=request.data, partial=True)
+        if serializer.is_valid(raise_exception=True):
+            serializer.save()
+            return Response(serializer.data)
+    elif request.method == "DELETE":
+        if request.user == comment.user:
+            comment.delete()
+            return Response({'detail': 'comment deleted successfully'}, status=status.HTTP_204_NO_CONTENT)
+        

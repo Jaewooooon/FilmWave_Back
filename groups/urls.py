@@ -13,4 +13,5 @@ urlpatterns = [
     path('<int:group_id>/posts/', views.group_post_list),
     path('<int:group_id>/posts/<int:post_id>/', views.group_post_detail),
     path('<int:group_id>/posts/<int:post_id>/comments/', views.group_comment_list),
+    path('<int:group_id>/posts/<int:post_id>/comments/<int:comment_id>/', views.group_comment_detail),
 ]
