@@ -166,6 +166,7 @@ def genre_frequency(request):
 @api_view(["GET"])
 def movie_like_list(request, username):
     if request.method == "GET":
+        print(username)
         user = get_object_or_404(User, username=username)
         movies = user.like_movies.all()
         serializer = MovieListSerializer(movies, many=True)
@@ -207,6 +208,13 @@ def genre_list(request):
         serializer = GenreListSerializer(genres, many=True)
         return Response(serializer.data)
 
+@api_view(["GET"])
+def user_review_list(request, username):
+    if request.method == "GET":
+        user = get_object_or_404(User, username=username)
+        reviews = user.review_set.all()
+        serializer = ReviewWithMovieSerializer(reviews, many=True)
+        return Response(serializer.data)
 
 @api_view(["GET"])
 def movie_search(request):
