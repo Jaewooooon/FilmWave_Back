@@ -12,7 +12,7 @@ from rest_framework.permissions import IsAuthenticated
 from django.core.paginator import Paginator, EmptyPage
 
 from .models import Movie, Review, Genre
-from accounts.models import UserPreference
+from accounts.models import User, UserPreference
 
 from .serializers import (
     MovieSerializer,
@@ -164,10 +164,10 @@ def genre_frequency(request):
 
 
 @api_view(["GET"])
-@permission_classes([IsAuthenticated])
-def movie_like_list(request):
+def movie_like_list(request, username):
     if request.method == "GET":
-        movies = request.user.like_movies.all()
+        user = get_object_or_404(User, username=username)
+        movies = user.like_movies.all()
         serializer = MovieListSerializer(movies, many=True)
         return Response(serializer.data)
 
