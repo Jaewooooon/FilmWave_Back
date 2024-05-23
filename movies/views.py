@@ -148,9 +148,10 @@ def movie_like(request, movie_id):
 
 @api_view(["GET"])
 @permission_classes([IsAuthenticated])
-def genre_frequency(request):
+def genre_frequency(request, username):
     if request.method == "GET":
-        movies = request.user.like_movies.all()
+        user = get_object_or_404(User, username=username)
+        movies = user.like_movies.all()
 
         genres = {}
         for movie in movies:
