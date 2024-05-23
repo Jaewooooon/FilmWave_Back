@@ -40,7 +40,7 @@ def movie_list(request):
         else:
             movies = Movie.objects.order_by("-popularity")
 
-        paginator = Paginator(movies, 20)
+        paginator = Paginator(movies, 50)
 
         try:
             page_obj = paginator.page(page)
