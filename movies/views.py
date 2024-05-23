@@ -181,7 +181,7 @@ def movie_review_list(request, movie_id):
     if request.method == "GET":
         reviews = movie.review_set.all()
         serializer = ReviewSerializer(reviews, many=True)
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.data)
 
     elif request.method == "POST":
         serializer = ReviewSerializer(data=request.data)
