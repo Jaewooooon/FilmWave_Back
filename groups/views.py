@@ -11,6 +11,7 @@ from rest_framework.permissions import IsAuthenticated
 from utils.S3ImageUploader import S3ImageUploader
 
 from .models import Group, MemberShip, MembershipRequest, Post, Comment
+from accounts.models import User
 from .serializers import (
     GroupSerializer,
     GroupListSerializer,
@@ -45,7 +46,7 @@ def group_list(request):
                 status=status.HTTP_401_UNAUTHORIZED,
             )
 
-        uploader = S3ImageUploader()
+        # uploader = S3ImageUploader()
 
         image = request.FILES.get('image')
 
@@ -74,12 +75,13 @@ def group_list(request):
 
 
 @api_view(["GET"])
-@permission_classes([IsAuthenticated])
-def my_group_list(request):
+def my_group_list(request, username):
     if request.method == "GET":
-        memberships = MemberShip.objects.filter(user=request.user)
+        user = get_object_or_404(User, username=username)
+        memberships = MemberShip.objects.filter(user=user)
         serializer = MembershipListSerializer(memberships, many=True)
         return Response(serializer.data)
+    return Response({'asd'})
 
 
 @api_view(["GET", "DELETE", "PUT"])
